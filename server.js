@@ -3,13 +3,14 @@
 var express = require("express");
 var logger = require("morgan");
 var mongoose = require("mongoose");
+var path = require("path");
 
 //Scraping tools
 var axios = require("axios");
 var cheerio = require("cheerio");
 
 // //require all models 
-// var db = require("./models");
+var db = require("./models");
 
 var PORT = process.env.PORT || 3000;
 
@@ -47,31 +48,78 @@ mongoose.connect(MONGODB_URI);
 
 //Shows all articles on the Home page 
 app.get("/", function(req, res){
+  db.Article.find({"saved": false}).then(function(result){
+    var hbsObject = { articles: result};
 
+    res.render("index", hbsObject);
+  }).catch(function(err){res.json(err)});
 })
 
 
 //Scrape articles from the New York Times
 app.get("/scraped", function(req, res){
+  axios.get("https://www.nytimes.com/").then(function(response){
+    var $ = cheerio.load(response.data);
 
+    $("article").each(function(i, element){
+      var result = {}
+
+      result.title = $(this)
+        .children("a")
+        .text();
+      result.link = $(this)
+        .children("a")
+        .attr("href");
+
+      
+      db.Article.create(result)
+        .then(function(dbArticle){
+          console.log(dbArticle);
+        })
+        .catch(function(err){
+          console.log(err);
+        });
+    });
+
+    res.send("Scrape Complete");x
+  })
 })
 
 //Display the saved articles
 app.get("/saved", function(req, res){
-
+  db.Article.find({"saved": true})
+  .populate("notes")
+  .then(function(result){
+  var hbsObject = { articles: result };
+  res.render("saved",hbsObject);
+}).catch(function(err){ res.json(err) });
 })
 
 //"post" the saved articles
 app.post("/saved/:id", function(req, res){
-
+  db.Article.findOneAndUpdate({"_id": req.params.id}, {"$set": {"saved": true}})
+  .then(function(result) {
+      res.json(result);
+  }).catch(function(err){ res.json(err) });
 })
 
-// add update function here??
+// delete saved article here 
+app.post("/delete/:id", function(req, res){
+  db.Article.findOneAndUpdate({"_id": req.params.id}, {"$set": {"saved": false}})
+  .then(function(result){
+      res.json(result);
+  }).catch(function(err) { res.json(err) });
+});
 
 
-// delete note here??
-
-
+// Grabs a specific article by id and populates it with it's note(s)
+app.get("/articles/:id", function(req, res) {
+  db.Article.findOne({"_id": req.params.id })
+    .populate("notes")
+    .then(function(result) {
+      res.json(result);
+    }).catch(function(err) { res.json(err); });
+});
 
 
 
