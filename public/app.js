@@ -6,7 +6,6 @@ $("#scrape").on("click", function() {
     }).done(function(data) {
         console.log(data)
         window.location = "/"
-        console.log("hello world")
     })
 });
 
