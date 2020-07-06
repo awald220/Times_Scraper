@@ -1,36 +1,37 @@
-  
-// Require mongoose
 var mongoose = require("mongoose");
-var Note = require("./Note");
-// Create Schema class
+
+// Save a reference to the Schema constructor
 var Schema = mongoose.Schema;
 
-// Create article schema
+// Using the Schema constructor, create a new UserSchema object
 var ArticleSchema = new Schema({
   title: {
     type: String,
     required: true
   },
-  summary: {
-    type: String,
-//    required: true
-  },
   link: {
     type: String,
-    required: true
+    required: false
+  },
+  summary: {
+      type: String,
+      required: false
   },
   saved: {
     type: Boolean,
     default: false
   },
+  // notes is an object that stores a Note id
+  // The ref property links the ObjectId to the Note model
+  // This allows us to populate the Article with an associated Note
   notes: [{
-     type: Schema.Types.ObjectId,
-     ref: "Note"
+    type: Schema.Types.ObjectId,
+    ref: "Note"
   }]
 });
 
-// Create the Article model with the ArticleSchema
+// This creates our model from the above schema, using mongoose's model method
 var Article = mongoose.model("Article", ArticleSchema);
 
-// Export the model
+// Export the Article model
 module.exports = Article;
