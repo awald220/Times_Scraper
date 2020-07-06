@@ -6,6 +6,7 @@ $(".save").on("click", function() {
         url: "/saved/" + thisId
     }).then(function(data) {
         window.location = "/"
+
     })
 });
 
@@ -26,8 +27,9 @@ $("#scrape").on("click", function() {
         method: "GET",
         url: "/scrape",
     }).then(function(data) {
-        //console.log(data)
+      
         window.location = "/"
+          console.log("ello", data)
     })
 });
 

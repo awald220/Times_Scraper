@@ -68,7 +68,7 @@ app.get("/scrape", function(req, res) {
        // console.log("did this run")
         var result = {};
         
-        result.body.title = $(element)
+        result.title = $(element)
         .text();
     
         result.link = $(element)
